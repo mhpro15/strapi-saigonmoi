@@ -1,7 +1,9 @@
 const path = require('path');
 
 module.exports = ({ env }) => {
-  const client = env('DATABASE_CLIENT', 'sqlite');
+  // Auto-detect client: if DATABASE_URL is set, use postgres; otherwise check DATABASE_CLIENT
+  const databaseUrl = env('DATABASE_URL');
+  const client = databaseUrl ? 'postgres' : env('DATABASE_CLIENT', 'sqlite');
 
   const connections = {
     mysql: {
@@ -49,6 +51,9 @@ module.exports = ({ env }) => {
       useNullAsDefault: true,
     },
   };
+
+  // Log which database is being used (helpful for debugging)
+  console.log(`[Database] Using client: ${client}${databaseUrl ? ' (via DATABASE_URL)' : ''}`);
 
   return {
     connection: {
