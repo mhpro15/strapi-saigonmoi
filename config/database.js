@@ -28,7 +28,19 @@ function parseDatabaseUrl(url) {
 }
 
 module.exports = ({ env }) => {
-  const databaseUrl = env('DATABASE_URL');
+  // Try multiple ways to get DATABASE_URL (for compatibility with different platforms)
+  const databaseUrl = env('DATABASE_URL') || process.env.DATABASE_URL;
+  
+  // Debug: Log if DATABASE_URL is found
+  if (process.env.NODE_ENV === 'production') {
+    console.log(`[Database] DATABASE_URL ${databaseUrl ? 'found' : 'NOT FOUND'}`);
+    if (databaseUrl) {
+      // Log a masked version for security
+      const maskedUrl = databaseUrl.replace(/:([^@]+)@/, ':****@');
+      console.log(`[Database] URL (masked): ${maskedUrl}`);
+    }
+  }
+  
   const parsedUrl = parseDatabaseUrl(databaseUrl);
   
   // Auto-detect client: if DATABASE_URL is set and parsed, use postgres
